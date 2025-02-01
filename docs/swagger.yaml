@@ -1,0 +1,311 @@
+definitions:
+  models.InventoryItem:
+    description: InventoryItem represents an item in the inventory
+    properties:
+      description:
+        example: This is a sample item
+        type: string
+      name:
+        example: Item A
+        type: string
+      quantity:
+        example: 100
+        type: integer
+    required:
+    - name
+    type: object
+  models.Restock:
+    description: Restock represents a restock event for an inventory item
+    properties:
+      amount:
+        example: 100
+        maximum: 1000
+        minimum: 10
+        type: integer
+      item_id:
+        description: Foreign key to InventoryItem
+        example: 1
+        type: integer
+    required:
+    - amount
+    type: object
+  models.User:
+    description: User represents a user in the system
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      password:
+        example: password123
+        type: string
+    required:
+    - email
+    - password
+    type: object
+info:
+  contact: {}
+  description: This is a sample server for an inventory management system. This API
+    requires an API key for authentication. Use the "Authorize" button to enter your
+    API key that you will obtain from the response of the Login method in the header.
+  termsOfService: http://swagger.io/terms/
+  title: Inventory API
+  version: "1.0"
+paths:
+  /admin/items:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all inventory items, optionally filtered by low stock
+      parameters:
+      - description: Filter low stock items (true/false)
+        in: query
+        name: lowStock
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.InventoryItem'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all inventory items
+      tags:
+      - inventory
+    post:
+      consumes:
+      - application/json
+      description: Create a new inventory item with the input payload
+      parameters:
+      - description: Create inventory item
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/models.InventoryItem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.InventoryItem'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new inventory item
+      tags:
+      - inventory
+  /admin/items/{item_id}/restock-history:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the restock history for a specific inventory item, sorted
+        by most recent.
+      parameters:
+      - description: Item ID
+        in: path
+        name: item_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get restock history for an item
+      tags:
+      - restock
+  /admin/items/restock-history:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the restock history for all inventory items, sorted by
+        most recent.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get restock history for all items
+      tags:
+      - restock
+  /admin/restock:
+    post:
+      consumes:
+      - application/json
+      description: Restock an inventory item with the specified amount. Limits restocks
+        to 3 per item in 24 hours.
+      parameters:
+      - description: Restock details
+        in: body
+        name: restock
+        required: true
+        schema:
+          $ref: '#/definitions/models.Restock'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "429":
+          description: Too Many Requests
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Restock an inventory item
+      tags:
+      - restock
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Login with email and password
+      parameters:
+      - description: Login user
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login a user
+      tags:
+      - users
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with the input payload
+      parameters:
+      - description: Register user
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    description: This API uses an API key authentication method. Include your API
+      key in the Authorization header.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

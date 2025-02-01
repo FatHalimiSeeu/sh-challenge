@@ -1,0 +1,43 @@
+version: '3.8'
+
+networks:
+  go-challenge:
+
+services:
+  go-api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - REDIS_ADDR=go-redis:6379
+      - SQL_CONNECTION_STRING=sqlserver://sa:Password123@go-sql:1433?encrypt=disable&trustservercertificate=true
+    depends_on:
+      - go-redis
+      - go-sql
+    networks:
+      - go-challenge
+
+  go-redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - go-challenge
+
+  go-sql:
+    image: mcr.microsoft.com/azure-sql-edge
+    environment:
+      SA_PASSWORD: "Password123"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    networks:
+      - go-challenge
+
+volumes:
+  redis_data:
+  sql_data:
