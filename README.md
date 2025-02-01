@@ -1,4 +1,4 @@
-# How to start:
+# How to run:
 I offer fully dockerized setup, it will be initial to only run the command below and you are ready to go:
 `docker-compose up --build`
 Please ensure the ports 1433, 6379, 8080 since i have configured it to also be served from host, due to easier usage of swagger ui.
